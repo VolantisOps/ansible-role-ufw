@@ -1,0 +1,33 @@
+---
+- name: Ensure UFW is installed
+  pacman: name=ufw state=present
+
+- name: Enable ufw
+  ufw: state=enabled
+
+- name: Enable ufw service
+  service: name=ufw enabled=yes
+
+# ufw supports connection rate limiting, which is useful for protecting
+# against brute-force login attacks. ufw will deny connections if an IP
+# address has attempted to initiate 6 or more connections in the last
+# 30 seconds. See  http://www.debian-administration.org/articles/187
+# for details. Typical usage is:
+- name: Limit ssh connections
+  ufw:
+    rule: limit
+    port: 22
+    proto: tcp
+
+- name: Allow port 5353
+  ufw:
+    rule: allow
+    port: 5353
+    proto: udp
+  when: ufw_allow_5353
+
+# Deny everything by default
+- name: Deny everything else by default
+  ufw:
+    direction: incoming
+    policy: deny
